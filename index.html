@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bodega Chichito</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    header {
+      background-color: #0D47A1;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .refresh-btn {
+      background-color: white;
+      color: #0D47A1;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .refresh-btn:hover {
+      background-color: #e3f2fd;
+    }
+
+    #sidebar {
+      width: 220px;
+      background-color: #eeeeee;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: -220px;
+      transition: left 0.3s ease;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+
+    #sidebar.active {
+      left: 0;
+    }
+
+    #sidebar ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+
+    #sidebar ul li {
+      margin: 15px 0;
+    }
+
+    #sidebar ul li a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      background-color: #f1f1f1;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .tab:hover {
+      background-color: #e0e0e0;
+    }
+
+    .tab.active {
+      background-color: #BBDEFB;
+    }
+
+    .content {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado -->
+ <header id="mainHeader">
+  <div class="header-left">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+    <span class="title">Bodega Chichito</span>
+  </div>
+  <button class="refresh-btn" onclick="location.reload()">Actualizar</button>
+</header>
+
+  <!-- Barra lateral -->
+  <div id="sidebar">
+    <ul>
+      <li><a href="#">🏠 Inicio</a></li>
+      <li><a href="#">📦 Inventario</a></li>
+      <li><a href="#">📋 Historial</a></li>
+      <li><a href="#">💬 Ayuda</a></li>
+    </ul>
+  </div>
+
+  <!-- Pestañas públicas -->
+  <div class="tabs">
+    <div class="tab active" onclick="cambiarSeccion('buscar')">🔍 Buscar Productos</div>
+    <div class="tab" onclick="cambiarSeccion('creditos')">📝 Registrar Créditos</div>
+    <div class="tab" onclick="cambiarSeccion('agregar')">➕ Agregar Productos</div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="content" id="contenido">
+    <h2>Bienvenido a Bodega Chichito</h2>
+    <p>Selecciona una pestaña para comenzar.</p>
+  </div>
+
+
+  <!-- Script principal -->
+  <script>
+    const CLAVE_ADMIN = "1234";
+    let accesoAutorizado = false;
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function cambiarSeccion(seccion) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+
+      if (seccion === 'buscar') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('contenido').innerHTML = '<h2>Buscar Productos</h2><p>Aquí irá el buscador...</p>';
+      } else if (seccion === 'creditos') {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('contenido').innerHTML = '<h2>Registrar Créditos</h2><p>Formulario para registrar créditos aquí...</p>';
+      } else if (seccion === 'agregar') {
+        document.querySelectorAll('.tab')[2].classList.add('active');
+
+        if (accesoAutorizado) {
+          mostrarPanelPrivado();
+        } else {
+          document.getElementById('contenido').innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 60vh;">
+              <div style="background-color: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;">
+                <h2 style="color: #0D47A1; margin-bottom: 10px;">🔐 Sección restringida</h2>
+                <p style="margin-bottom: 20px;">Ingresa la clave para acceder a esta sección:</p>
+                <input type="password" id="claveInput" placeholder="Clave de acceso" style="padding: 12px; width: 100%; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px;"/>
+                <br>
+                <button onclick="validarClave()" style="background-color: #0D47A1; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer;">Acceder</button>
+                <p id="mensajeError" style="color: red; margin-top: 15px; display: none;">❌ Clave incorrecta</p>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function validarClave() {
+      const clave = document.getElementById('claveInput').value;
+      const mensajeError = document.getElementById('mensajeError');
+
+      if (clave === CLAVE_ADMIN) {
+        accesoAutorizado = true;
+        mostrarPanelPrivado();
+      } else {
+        mensajeError.style.display = 'block';
+      }
+    }
+
+    function mostrarPanelPrivado() {
+  document.querySelector('.tabs').style.display = 'none';
+  document.querySelector('.refresh-btn').style.display = 'none';
+  document.querySelector('.menu-icon').style.display = 'none';
+
+  // Cambiar encabezado
+  document.getElementById('mainHeader').innerHTML = `
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button onclick="volverAlInicio()" style="
+        background-color: white;
+        color: #0D47A1;
+        border: none;
+        padding: 8px 15px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+      ">Volver al inicio</button>
+      <span style="font-size: 18px; font-weight: bold;">Gestión de Productos</span>
+    </div>
+  `;
+
+  // Mostrar zona privada
+  document.getElementById('contenido').innerHTML = `
+    <div id="contenidoPrivado"></div>
+  `;
+
+  mostrarAgregarProducto();
+}
+
+    function mostrarAgregarProducto() {
+      document.getElementById('contenidoPrivado').innerHTML = `
+        <div style="max-width: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <h2 style="color: #0D47A1; text-align: center;">➕ Agregar Producto</h2>
+          <form onsubmit="guardarProducto(event)">
+            <label>📦 Nombre del producto:</label><br>
+            <input type="text" id="nombre" placeholder="Ej: Galletas Oreo" required style="width: 100%; padding: 10px; margin: 10px 0 20px; border: 1px solid #ccc; border-radius: 8px;">
+            <label>💵 Precio (S/):</label><br>
+            <input type="number" id="precio" placeholder="Ej: 2.50" step="0.01" required style="width: 100%; padding: 10px; margin: 10px 0 20px; border: 1px solid #ccc; border-radius: 8px;">
+            <button type="submit" style="width: 100%; padding: 12px; background-color: #0D47A1; color: white; font-size: 16px; border: none; border-radius: 8px; cursor: pointer;">Guardar Producto</button>
+          </form>
+          <p id="mensajeGuardado" style="color: green; text-align: center; margin-top: 15px; display: none;">✅ Producto guardado correctamente.</p>
+        </div>
+      `;
+    }
+
+    function guardarProducto(event) {
+      event.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const precio = document.getElementById('precio').value.trim();
+
+      if (!nombre || !precio) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+
+      const productos = JSON.parse(localStorage.getItem('productos')) || [];
+      productos.push({ nombre, precio });
+      localStorage.setItem('productos', JSON.stringify(productos));
+
+      document.getElementById('mensajeGuardado').style.display = 'block';
+
+      setTimeout(() => {
+        document.getElementById('mensajeGuardado').style.display = 'none';
+        document.getElementById('nombre').value = '';
+        document.getElementById('precio').value = '';
+      }, 2000);
+    }
+
+    function volverAlInicio() {
+      document.getElementById('modalConfirmacion').style.display = 'flex';
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalConfirmacion').style.display = 'none';
+    }
+
+    function confirmarSalida() {
+      cerrarModal();
+      accesoAutorizado = false;
+      document.getElementById('mainHeader').innerHTML = `
+  <div class="header-left">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+    <span class="title">Bodega Chichito</span>
+  </div>
+  <button class="refresh-btn" onclick="location.reload()">Actualizar</button>
+`;
+document.querySelector('.tabs').style.display = 'flex';
+  document.querySelector('.refresh-btn').style.display = 'inline-block';
+  document.querySelector('.menu-icon').style.display = 'inline-block';
+
+  // Volver al contenido principal
+  cambiarSeccion('buscar');
+}
+  </script>
+<!-- Modal de confirmación para salir del panel privado -->
+  <div id="modalConfirmacion" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  ">
+    <div style="
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 300px;
+      width: 90%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    ">
+      <h3>¿Deseas salir?</h3>
+      <p>Perderás el acceso al panel privado.</p>
+      <button onclick="confirmarSalida()" style="
+        background-color: #0D47A1;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      ">Sí, salir</button>
+      <br><br>
+      <button onclick="cerrarModal()" style="
+        background: transparent;
+        color: #0D47A1;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+      ">Cancelar</button>
+    </div>
+  </div>
+</body>
+</html>
